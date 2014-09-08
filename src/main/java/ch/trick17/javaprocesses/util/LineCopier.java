@@ -20,6 +20,15 @@ public class LineCopier implements Runnable, Callable<Void> {
     private final BufferedReader reader;
     private final Writer writer;
     
+    /**
+     * Convenience constrcutor. The given {@link Reader} is wrapped in a
+     * {@link BufferedReader}.
+     * 
+     * @param reader
+     *            Source
+     * @param writer
+     *            Destination
+     */
     public LineCopier(final Reader reader, final Writer writer) {
         this.reader = new BufferedReader(reader);
         this.writer = writer;

@@ -40,6 +40,8 @@ public class JavaProcessBuilder {
     private static final String javaExe = File.separator + "bin"
             + File.separator + "java";
     
+    private static ProcessKiller killer;
+    
     private final String mainClass;
     private final List<String> args;
     
@@ -425,8 +427,18 @@ public class JavaProcessBuilder {
         command.addAll(args);
         
         logger.debug("Starting Java process: {}", command);
-        return builder.command(command).start();
+        final Process process = builder.command(command).start();
+        if(killOnShutdown)
+            getKiller().getProcesses().add(process);
         
-        // TODO: Kill
+        return process;
+    }
+    
+    private static synchronized ProcessKiller getKiller() {
+        if(killer == null) {
+            killer = new ProcessKiller();
+            Runtime.getRuntime().addShutdownHook(new Thread(killer));
+        }
+        return killer;
     }
 }
