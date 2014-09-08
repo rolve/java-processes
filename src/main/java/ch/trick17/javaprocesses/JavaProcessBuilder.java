@@ -429,12 +429,14 @@ public class JavaProcessBuilder {
         logger.debug("Starting Java process: {}", command);
         final Process process = builder.command(command).start();
         if(killOnShutdown)
-            getKiller().getProcesses().add(process);
+            synchronized(JavaProcessBuilder.class) {
+                getKiller().getProcesses().add(process);
+            }
         
         return process;
     }
     
-    private static synchronized ProcessKiller getKiller() {
+    private static ProcessKiller getKiller() {
         if(killer == null) {
             killer = new ProcessKiller();
             Runtime.getRuntime().addShutdownHook(new Thread(killer));
