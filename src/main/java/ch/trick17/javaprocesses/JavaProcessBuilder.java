@@ -39,6 +39,7 @@ public class JavaProcessBuilder {
     private String classpath = System.getProperty("java.class.path");
     private List<String> vmArgs = ManagementFactory.getRuntimeMXBean()
             .getInputArguments();
+    private boolean autoExit = false;
     
     /**
      * Creates a builder for Java process builders with the given main class and
@@ -210,6 +211,30 @@ public class JavaProcessBuilder {
         return this;
     }
     
+    /**
+     * Returns this builder's auto exit flag. If <code>true</code>, Java
+     * subprocesses will be started via {@link AutoExitProgram}.
+     *
+     * @return This builder's auto exit flag
+     * @see AutoExit
+     */
+    public boolean autoExit() {
+        return autoExit;
+    }
+    
+    /**
+     * Sets this builder's auto exit flag. If <code>true</code>, Java
+     * subprocesses will be started via {@link AutoExitProgram}.
+     *
+     * @param exit
+     *            The new value for the auto exit flag
+     * @return This builder
+     */
+    public JavaProcessBuilder autoExit(final boolean exit) {
+        autoExit = exit;
+        return this;
+    }
+    
     /* TODO: Support for system properties. From Javadoc: "Note that system
      * properties are generally preferred over environment variables for Java
      * subprocesses. See {@link System#getenv(String)}" */
@@ -227,7 +252,7 @@ public class JavaProcessBuilder {
      */
     public ProcessBuilder create() {
         return new ProcessBuilder(javaCommand(javaHome, classpath, vmArgs,
-                mainClass, args));
+                mainClass, args, autoExit));
     }
     
     /**
@@ -258,19 +283,25 @@ public class JavaProcessBuilder {
      *            The name of the main class
      * @param args
      *            The arguments for the main class
+     * @param autoExit
+     *            Whether the program should be started via
+     *            {@link AutoExitProgram}
      * @return The corresponding command list
      * @throws NullPointerException
      *             If any of the arguments is <code>null</code>
      */
     public static List<String> javaCommand(final String javaHome,
             final String classpath, final List<String> vmArgs,
-            final String mainClass, final List<String> args) {
+            final String mainClass, final List<String> args,
+            final boolean autoExit) {
         if(javaHome == null || classpath == null || mainClass == null)
             throw new NullPointerException();
         
         final ArrayList<String> command = new ArrayList<String>();
         command.addAll(asList(javaHome + javaExe, "-cp", classpath));
         command.addAll(vmArgs);
+        if(autoExit)
+            command.add(AutoExitProgram.class.getName());
         command.add(mainClass);
         command.addAll(args);
         return command;
