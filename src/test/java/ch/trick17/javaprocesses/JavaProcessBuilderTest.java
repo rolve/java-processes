@@ -18,7 +18,7 @@ public class JavaProcessBuilderTest {
     @Test
     public void testStart() throws IOException, InterruptedException {
         final Process process = new JavaProcessBuilder(Greeter.class, "Michael")
-                .create().start();
+                .start();
         
         final StringWriter output = new StringWriter();
         final StringWriter errors = new StringWriter();

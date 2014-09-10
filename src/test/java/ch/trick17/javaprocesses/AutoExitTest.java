@@ -12,13 +12,11 @@ public class AutoExitTest {
     private static final File testFile = new File("target/testfile");
     
     @Test
-    public void testAutoExitParentTerminates() throws IOException,
-            InterruptedException {
+    public void testParentTerminates() throws IOException, InterruptedException {
         testFile.createNewFile();
         assertTrue(testFile.exists());
         
-        new JavaProcessBuilder(FileDeleterRunner.class, "no autoexit").create()
-                .start();
+        new JavaProcessBuilder(FileDeleterRunner.class, "no autoexit").start();
         
         Thread.sleep(5000);
         assertFalse(testFile.exists());
@@ -26,8 +24,7 @@ public class AutoExitTest {
         testFile.createNewFile();
         assertTrue(testFile.exists());
         
-        new JavaProcessBuilder(FileDeleterRunner.class, "autoexit").create()
-                .start();
+        new JavaProcessBuilder(FileDeleterRunner.class, "autoexit").start();
         
         Thread.sleep(5000);
         assertTrue(testFile.exists());
@@ -37,7 +34,7 @@ public class AutoExitTest {
     
     public static class FileDeleterRunner {
         public static void main(final String[] args) throws IOException {
-            new JavaProcessBuilder(FileDeleter.class, args).create().start();
+            new JavaProcessBuilder(FileDeleter.class, args).start();
             
             /* When this program exits (i.e. now), so should the FileDeleter
              * program (if autoexit is set). */
@@ -56,10 +53,9 @@ public class AutoExitTest {
     }
     
     @Test
-    public void testAutoExitChildTerminates() throws IOException,
-            InterruptedException {
+    public void testChildTerminates() throws IOException, InterruptedException {
         final Process greeter = new JavaProcessBuilder(Greeter.class,
-                "no autoexit").create().start();
+                "no autoexit").start();
         /* Child process should terminate even if the parent is still running */
         
         Thread.sleep(2000);
@@ -67,7 +63,7 @@ public class AutoExitTest {
     }
     
     public static class Greeter {
-        public static void main(final String[] args) throws Exception {
+        public static void main(final String[] args) {
             AutoExit.install();
             
             System.out.println("Hello World!");

@@ -17,7 +17,10 @@ import org.slf4j.LoggerFactory;
  * <p>
  * Obviously, this class should not be used if the standard input stream is used
  * for something else. If this is the case, an error message is
- * {@linkplain Logger#error(String) logged}.
+ * {@linkplain Logger#error(String) logged}. Also, the parent process should not
+ * close the input stream of the child (i.e. the
+ * {@linkplain Process#getOutputStream() output stream} from the parent's point
+ * of view), as this will kill the child process.
  * 
  * @author Michael Faes
  */

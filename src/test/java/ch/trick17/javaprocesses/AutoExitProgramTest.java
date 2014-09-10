@@ -8,16 +8,16 @@ import java.io.IOException;
 
 import org.junit.Test;
 
-public class ProcessKillerTest {
+public class AutoExitProgramTest {
     
     private static final File testFile = new File("target/testfile");
     
     @Test
-    public void testKill() throws IOException, InterruptedException {
+    public void testParentTerminates() throws IOException, InterruptedException {
         testFile.createNewFile();
         assertTrue(testFile.exists());
         
-        new JavaProcessBuilder(FileDeleterRunner.class, "don't kill").start();
+        new JavaProcessBuilder(FileDeleterRunner.class, "no autoexit").start();
         
         Thread.sleep(5000);
         assertFalse(testFile.exists());
@@ -25,7 +25,7 @@ public class ProcessKillerTest {
         testFile.createNewFile();
         assertTrue(testFile.exists());
         
-        new JavaProcessBuilder(FileDeleterRunner.class, "kill").start();
+        new JavaProcessBuilder(FileDeleterRunner.class, "autoexit").start();
         
         Thread.sleep(5000);
         assertTrue(testFile.exists());
@@ -35,11 +35,13 @@ public class ProcessKillerTest {
     
     public static class FileDeleterRunner {
         public static void main(final String[] args) throws IOException {
-            final Process process = new JavaProcessBuilder(FileDeleter.class)
-                    .start();
+            if(args[0].equals("autoexit"))
+                new JavaProcessBuilder(AutoExitProgram.class, FileDeleter.class
+                        .getName()).start();
+            else
+                new JavaProcessBuilder(FileDeleter.class).start();
             
-            if(args[0].equals("kill"))
-                new ProcessKiller().add(process);
+            /* When this program exits (i.e. now), so should the AutoExitProgram */
         }
     }
     

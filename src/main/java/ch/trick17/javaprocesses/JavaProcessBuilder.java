@@ -3,6 +3,7 @@ package ch.trick17.javaprocesses;
 import static java.util.Arrays.asList;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -84,17 +85,25 @@ public class JavaProcessBuilder {
     private static String checkMainClass(final Class<?> mainClass) {
         final String name = mainClass.getName();
         try {
-            final Method main = mainClass.getMethod("main", String[].class);
-            final int modifiers = main.getModifiers();
-            if(!Modifier.isPublic(modifiers) || !Modifier.isStatic(modifiers)
-                    || main.getReturnType() != Void.TYPE)
-                throw new NoSuchMethodException();
+            mainMethodOf(mainClass);
         } catch(final NoSuchMethodException e) {
             throw new IllegalArgumentException("Class " + name
                     + " does not have a \"public static void main(String[])\""
                     + " method and therefore cannot be started in a process.");
         }
         return name;
+    }
+    
+    public static Method mainMethodOf(final Class<?> mainClass)
+            throws NoSuchMethodException {
+        final Method main = mainClass.getMethod("main", String[].class);
+        final int modifiers = main.getModifiers();
+        if(!Modifier.isPublic(modifiers) || !Modifier.isStatic(modifiers)
+                || main.getReturnType() != Void.TYPE)
+            throw new NoSuchMethodException("Class " + main.getName()
+                    + " does not have a \"public static void main(String[])\""
+                    + " method");
+        return main;
     }
     
     /**
@@ -219,6 +228,18 @@ public class JavaProcessBuilder {
     public ProcessBuilder create() {
         return new ProcessBuilder(javaCommand(javaHome, classpath, vmArgs,
                 mainClass, args));
+    }
+    
+    /**
+     * Convenience method that {@linkplain #create() creates} a process builder
+     * and {@linkplain ProcessBuilder#start() starts} a process.
+     * 
+     * @return The started process
+     * @throws IOException
+     *             If one is thrown by the {@link ProcessBuilder#start()} method
+     */
+    public Process start() throws IOException {
+        return create().start();
     }
     
     /**
