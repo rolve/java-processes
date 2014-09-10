@@ -36,6 +36,10 @@ public class AutoExit extends Thread {
         new AutoExit().start();
     }
     
+    public AutoExit() {
+        setDaemon(true);
+    }
+    
     @Override
     public void run() {
         try {
