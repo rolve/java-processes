@@ -3,6 +3,7 @@ package ch.trick17.javaprocesses;
 import static ch.trick17.javaprocesses.JavaProcessBuilder.mainMethodOf;
 import static java.util.Arrays.copyOfRange;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 /**
@@ -24,10 +25,10 @@ public class AutoExitProgram {
      * @param args
      *            Command line arguments. The first argument must be the name of
      *            the main class to start.
-     * @throws Exception
+     * @throws Throwable
      *             If anything goes wrong when trying to invoke the main method
      */
-    public static void main(final String[] args) throws Exception {
+    public static void main(final String[] args) throws Throwable {
         AutoExit.install();
         
         if(args.length < 1)
@@ -36,6 +37,10 @@ public class AutoExitProgram {
         final Method main = mainMethodOf(Class.forName(args[0]));
         final String[] newArgs = copyOfRange(args, 1, args.length);
         
-        main.invoke(null, new Object[]{newArgs});
+        try {
+            main.invoke(null, new Object[]{newArgs});
+        } catch(final InvocationTargetException e) {
+            throw e.getCause();
+        }
     }
 }
