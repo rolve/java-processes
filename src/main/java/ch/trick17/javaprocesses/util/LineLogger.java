@@ -5,22 +5,20 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.io.Writer;
 import java.util.concurrent.Callable;
 
+import org.slf4j.Logger;
+
 /**
- * A simple {@link Runnable}/{@link Callable} that copies all text from a
- * {@link BufferedReader} to a {@link Writer}. This is done line by line.
+ * A simple {@link Runnable}/{@link Callable} that forwards all text from a
+ * {@link BufferedReader} to a {@link Logger}. This is done line by line.
  * 
  * @author Michael Faes
  */
-public class LineCopier implements Runnable, Callable<Void> {
-    
-    private static final String lineSeparator = System
-            .getProperty("line.separator");
+public class LineLogger implements Runnable, Callable<Void> {
     
     private final BufferedReader reader;
-    private final Writer writer;
+    private final Logger logger;
     
     /**
      * Convenience constructor. The given {@link InputStream} is wrapped in an
@@ -29,11 +27,11 @@ public class LineCopier implements Runnable, Callable<Void> {
      * 
      * @param in
      *            Source
-     * @param writer
+     * @param logger
      *            Destination
      */
-    public LineCopier(InputStream in, final Writer writer) {
-        this(new InputStreamReader(in), writer);
+    public LineLogger(InputStream in, final Logger logger) {
+        this(new InputStreamReader(in), logger);
     }
     
     /**
@@ -42,20 +40,20 @@ public class LineCopier implements Runnable, Callable<Void> {
      * 
      * @param reader
      *            Source
-     * @param writer
+     * @param logger
      *            Destination
      */
-    public LineCopier(final Reader reader, final Writer writer) {
-        this(new BufferedReader(reader), writer);
+    public LineLogger(final Reader reader, final Logger logger) {
+        this(new BufferedReader(reader), logger);
     }
     
-    public LineCopier(final BufferedReader reader, final Writer writer) {
+    public LineLogger(final BufferedReader reader, final Logger logger) {
         this.reader = reader;
-        this.writer = writer;
+        this.logger = logger;
     }
     
     /**
-     * Does the copying.
+     * Does the forwarding.
      * 
      * @throws RuntimeException
      *             If an {@link IOException} occurs
@@ -69,14 +67,12 @@ public class LineCopier implements Runnable, Callable<Void> {
     }
     
     /**
-     * Does the copying.
+     * Does the forwarding.
      */
     public Void call() throws IOException {
         String line;
-        while((line = reader.readLine()) != null) {
-            writer.write(line);
-            writer.write(lineSeparator);
-        }
+        while((line = reader.readLine()) != null)
+            logger.info(line);
         return null;
     }
 }
