@@ -27,13 +27,16 @@ public class LineCopier implements Runnable, Callable<Void> {
      * @param writer
      *            Destination
      */
-    public LineCopier(InputStream in, final LineWriter writer) {
+    public LineCopier(InputStream in, final LineWriter... writer) {
         this(new BufferedReader(new InputStreamReader(in)), writer);
     }
     
-    public LineCopier(final BufferedReader reader, final LineWriter writer) {
+    public LineCopier(final BufferedReader reader, final LineWriter... writers) {
         this.reader = reader;
-        this.writer = writer;
+        if(writers.length == 1)
+            this.writer = writers[0];
+        else
+            this.writer = new TeeLineWriter(writers);
     }
     
     /**
