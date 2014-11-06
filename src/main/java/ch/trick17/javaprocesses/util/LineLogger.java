@@ -23,18 +23,20 @@ public class LineLogger implements LineWriter {
         this.logger = logger;
     }
     
-    public void setPrefix(String prefix) {
-        if(prefix == null)
+    public LineLogger withPrefix(String thePrefix) {
+        if(thePrefix == null)
             throw new IllegalArgumentException("null");
-        this.prefix = prefix;
+        this.prefix = thePrefix;
+        return this;
     }
     
     public String getPrefix() {
         return prefix;
     }
     
-    public void setLogLevel(LogLevel logLevel) {
-        this.logLevel = logLevel;
+    public LineLogger withLogLevel(LogLevel level) {
+        this.logLevel = level;
+        return this;
     }
     
     public LogLevel getLogLevel() {

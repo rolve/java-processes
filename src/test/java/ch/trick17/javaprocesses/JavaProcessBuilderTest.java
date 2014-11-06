@@ -13,6 +13,7 @@ import java.io.StringWriter;
 import org.junit.Test;
 
 import ch.trick17.javaprocesses.util.LineCopier;
+import ch.trick17.javaprocesses.util.LineWriterAdapter;
 
 public class JavaProcessBuilderTest {
     
@@ -27,9 +28,11 @@ public class JavaProcessBuilderTest {
         final StringWriter output = new StringWriter();
         final StringWriter errors = new StringWriter();
         new Thread(new LineCopier(new BufferedReader(new InputStreamReader(
-                process.getInputStream())), output)).start();
+                process.getInputStream())), new LineWriterAdapter(output)))
+                .start();
         new Thread(new LineCopier(new BufferedReader(new InputStreamReader(
-                process.getErrorStream())), errors)).start();
+                process.getErrorStream())), new LineWriterAdapter(errors)))
+                .start();
         
         process.waitFor();
         assertEquals("", errors.toString());
