@@ -1,10 +1,6 @@
 package ch.trick17.javaprocesses.util;
 
 import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.util.concurrent.Callable;
 
 import org.slf4j.Logger;
@@ -16,43 +12,14 @@ import org.slf4j.Logger;
  * 
  * @author Michael Faes
  */
-public class LineLogger implements Runnable, Callable<Void> {
+public class LineLogger implements LineWriter {
     
-    private final BufferedReader reader;
     private final Logger logger;
     
     private String prefix = "";
     private LogLevel logLevel = LogLevel.INFO;
     
-    /**
-     * Convenience constructor. The given {@link InputStream} is wrapped in an
-     * {@link InputStreamReader} (with the default charset) and in a
-     * {@link BufferedReader}.
-     * 
-     * @param in
-     *            Source
-     * @param logger
-     *            Destination
-     */
-    public LineLogger(InputStream in, final Logger logger) {
-        this(new InputStreamReader(in), logger);
-    }
-    
-    /**
-     * Convenience constructor. The given {@link Reader} is wrapped in a
-     * {@link BufferedReader}.
-     * 
-     * @param reader
-     *            Source
-     * @param logger
-     *            Destination
-     */
-    public LineLogger(final Reader reader, final Logger logger) {
-        this(new BufferedReader(reader), logger);
-    }
-    
-    public LineLogger(final BufferedReader reader, final Logger logger) {
-        this.reader = reader;
+    public LineLogger(Logger logger) {
         this.logger = logger;
     }
     
@@ -74,48 +41,24 @@ public class LineLogger implements Runnable, Callable<Void> {
         return logLevel;
     }
     
-    /**
-     * Does the forwarding.
-     * 
-     * @throws RuntimeException
-     *             If an {@link IOException} occurs
-     */
-    public void run() {
-        try {
-            call();
-        } catch(final IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-    
-    /**
-     * Does the forwarding.
-     */
-    public Void call() throws IOException {
-        String line;
+    public void writeLine(String line) {
         switch(logLevel) {
         case TRACE:
-            while((line = reader.readLine()) != null)
-                logger.trace(prefix + line);
+            logger.trace(prefix + line);
             break;
         case DEBUG:
-            while((line = reader.readLine()) != null)
-                logger.debug(prefix + line);
+            logger.debug(prefix + line);
             break;
         case INFO:
-            while((line = reader.readLine()) != null)
-                logger.info(prefix + line);
+            logger.info(prefix + line);
             break;
         case WARN:
-            while((line = reader.readLine()) != null)
-                logger.warn(prefix + line);
+            logger.warn(prefix + line);
             break;
         case ERROR:
-            while((line = reader.readLine()) != null)
-                logger.error(prefix + line);
+            logger.error(prefix + line);
             break;
         }
-        return null;
     }
     
     public enum LogLevel {

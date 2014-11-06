@@ -4,23 +4,19 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.Reader;
 import java.io.Writer;
 import java.util.concurrent.Callable;
 
 /**
  * A simple {@link Runnable}/{@link Callable} that copies all text from a
- * {@link BufferedReader} to a {@link Writer}. This is done line by line.
+ * {@link BufferedReader} to a {@link LineWriter}, line by line.
  * 
  * @author Michael Faes
  */
 public class LineCopier implements Runnable, Callable<Void> {
     
-    private static final String lineSeparator = System
-            .getProperty("line.separator");
-    
     private final BufferedReader reader;
-    private final Writer writer;
+    private final LineWriter writer;
     
     /**
      * Convenience constructor. The given {@link InputStream} is wrapped in an
@@ -32,24 +28,24 @@ public class LineCopier implements Runnable, Callable<Void> {
      * @param writer
      *            Destination
      */
-    public LineCopier(InputStream in, final Writer writer) {
-        this(new InputStreamReader(in), writer);
+    public LineCopier(InputStream in, final LineWriter writer) {
+        this(new BufferedReader(new InputStreamReader(in)), writer);
     }
     
     /**
-     * Convenience constructor. The given {@link Reader} is wrapped in a
-     * {@link BufferedReader}.
+     * Convenience constructor. The given {@link Writer} is wrapped in a
+     * {@link LineWriter} adapter.
      * 
      * @param reader
      *            Source
      * @param writer
      *            Destination
      */
-    public LineCopier(final Reader reader, final Writer writer) {
-        this(new BufferedReader(reader), writer);
+    public LineCopier(final BufferedReader reader, Writer writer) {
+        this(reader, new DefaultLineWriter(writer));
     }
     
-    public LineCopier(final BufferedReader reader, final Writer writer) {
+    public LineCopier(final BufferedReader reader, final LineWriter writer) {
         this.reader = reader;
         this.writer = writer;
     }
@@ -73,10 +69,25 @@ public class LineCopier implements Runnable, Callable<Void> {
      */
     public Void call() throws IOException {
         String line;
-        while((line = reader.readLine()) != null) {
+        while((line = reader.readLine()) != null)
+            writer.writeLine(line);
+        return null;
+    }
+    
+    private static class DefaultLineWriter implements LineWriter {
+        
+        static final String lineSeparator = System
+                .getProperty("line.separator");
+        
+        final Writer writer;
+        
+        DefaultLineWriter(Writer writer) {
+            this.writer = writer;
+        }
+        
+        public void writeLine(String line) throws IOException {
             writer.write(line);
             writer.write(lineSeparator);
         }
-        return null;
     }
 }
