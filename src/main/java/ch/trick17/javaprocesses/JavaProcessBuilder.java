@@ -248,7 +248,7 @@ public class JavaProcessBuilder {
      * the working directory, the environment, etc.
      * 
      * @return A process builder
-     * @see #javaCommand(String, String, List, String, List)
+     * @see #javaCommand(String, String, List, String, List, boolean)
      */
     public ProcessBuilder create() {
         return new ProcessBuilder(javaCommand(javaHome, classpath, vmArgs,

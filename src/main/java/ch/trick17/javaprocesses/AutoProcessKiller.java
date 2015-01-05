@@ -14,7 +14,7 @@ import java.util.List;
  * 
  * @author Michael Faes
  */
-public class ProcessKiller extends Thread {
+public class AutoProcessKiller extends Thread {
     
     private final List<Process> processes = new ArrayList<Process>();
     
@@ -22,7 +22,7 @@ public class ProcessKiller extends Thread {
      * Creates a process killer, which registers itself as a
      * {@linkplain Runtime#addShutdownHook(Thread) shutdown hook}.
      */
-    public ProcessKiller() {
+    public AutoProcessKiller() {
         Runtime.getRuntime().addShutdownHook(this);
     }
     

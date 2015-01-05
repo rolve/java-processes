@@ -8,7 +8,7 @@ import java.io.IOException;
 
 import org.junit.Test;
 
-public class ProcessKillerTest {
+public class AutoProcessKillerTest {
     
     private static final File testFile = new File("target/testfile");
     
@@ -39,7 +39,7 @@ public class ProcessKillerTest {
                     .start();
             
             if(args[0].equals("kill"))
-                new ProcessKiller().add(process);
+                new AutoProcessKiller().add(process);
         }
     }
     
