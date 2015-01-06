@@ -37,8 +37,8 @@ public class JavaProcessBuilder {
     
     private String javaHome = System.getProperty("java.home");
     private String classpath = System.getProperty("java.class.path");
-    private List<String> vmArgs = ManagementFactory.getRuntimeMXBean()
-            .getInputArguments();
+    private final List<String> vmArgs = new ArrayList<String>(ManagementFactory
+            .getRuntimeMXBean().getInputArguments());
     private boolean autoExit = false;
     
     /**
@@ -54,9 +54,10 @@ public class JavaProcessBuilder {
     
     /**
      * Creates a builder for Java process builders with the given main class and
-     * arguments. This is a convenience constructor that sets the arguments to a
-     * string list containing the same strings as the given array, in the same
-     * order.
+     * arguments. This constructor does <i>not</i> make a copy of the
+     * <code>args</code> array. Subsequent updates to the array will be
+     * reflected in the state of this builder (but not in the state of actual
+     * process builders).
      * 
      * @param mainClass
      *            The main class
@@ -64,7 +65,7 @@ public class JavaProcessBuilder {
      *            The arguments for the main class
      */
     public JavaProcessBuilder(final Class<?> mainClass, final String... args) {
-        this(mainClass, new ArrayList<String>(asList(args)));
+        this(mainClass, asList(args));
     }
     
     /**
@@ -111,7 +112,29 @@ public class JavaProcessBuilder {
      * Creates a builder for Java process builders with the given main class and
      * arguments. If the class is in the current classpath, the
      * {@link #JavaProcessBuilder(Class)} constructor should be used instead, as
-     * it checks if the class is a valid main class.
+     * it checks if the class is a valid main class. This constructor does
+     * <i>not</i> make a copy of the <code>args</code> array. Subsequent updates
+     * to the array will be reflected in the state of this builder (but not in
+     * the state of actual process builders).
+     * 
+     * @param mainClass
+     *            The {@linkplain Class#getCanonicalName() canonical name} of
+     *            the main class.
+     * @param args
+     *            The arguments for the main class
+     */
+    public JavaProcessBuilder(final String mainClass, final String... args) {
+        this(mainClass, asList(args));
+    }
+    
+    /**
+     * Creates a builder for Java process builders with the given main class and
+     * arguments. If the class is in the current classpath, the
+     * {@link #JavaProcessBuilder(Class)} constructor should be used instead, as
+     * it checks if the class is a valid main class. This constructor does
+     * <i>not</i> make a copy of the <code>args</code> list. Subsequent updates
+     * to the list will be reflected in the state of this builder (but not in
+     * the state of actual process builders).
      * 
      * @param mainClass
      *            The {@linkplain Class#getCanonicalName() canonical name} of
@@ -136,20 +159,19 @@ public class JavaProcessBuilder {
     
     /**
      * Sets this builder's Java home directory. Java subprocesses will use the
-     * Java executable in this directory. The argument may be <code>null</code>
-     * &ndash; this means to use the Java home directory of the current Java
-     * process, defined by the system property <code>java.home</code>, as the
-     * Java home directory of the child process.</p>
+     * Java executable in this directory. If this method is never called, the
+     * Java home directory of the current Java process, defined by the system
+     * property <code>java.home</code>, is used as the Java home directory of
+     * the child process.</p>
      *
      * @param home
-     *            The new Java home directory
+     *            The new Java home directory, not null
      * @return This builder
      */
     public JavaProcessBuilder javaHome(final String home) {
         if(home == null)
-            javaHome = System.getProperty("java.home");
-        else
-            javaHome = home;
+            throw new NullPointerException();
+        javaHome = home;
         return this;
     }
     
@@ -165,20 +187,36 @@ public class JavaProcessBuilder {
     
     /**
      * Sets this builder's classpath. Java subprocesses will use this as their
-     * classpath. The argument may be <code>null</code> &ndash; this means to
-     * use the classpath of the current Java process, defined by the system
-     * property <code>java.class.path</code>, as the classpath of the child
-     * process.</p>
+     * classpath. If this method is never called, the classpath of the current
+     * Java process, defined by the property <code>java.class.path</code>, is
+     * used as the classpath of the child process.</p>
      *
      * @param cp
-     *            The new classpath
+     *            The new classpath, not null
      * @return This builder
      */
     public JavaProcessBuilder classpath(final String cp) {
         if(cp == null)
-            classpath = System.getProperty("java.class.path");
-        else
+            throw new NullPointerException();
+        classpath = cp;
+        return this;
+    }
+    
+    /**
+     * Adds the given string to this builder's classpath.
+     *
+     * @param cp
+     *            The additional classpath element, not null
+     * @return This builder
+     */
+    public JavaProcessBuilder addClasspath(final String cp) {
+        if(cp == null)
+            throw new NullPointerException();
+        
+        if(classpath.isEmpty())
             classpath = cp;
+        else
+            classpath += File.separator + cp;
         return this;
     }
     
@@ -189,25 +227,38 @@ public class JavaProcessBuilder {
      * @return This builder's VM arguments
      */
     public List<String> vmArgs() {
-        return vmArgs;
+        return new ArrayList<String>(vmArgs);
     }
     
     /**
      * Sets this builder's VM arguments. Java subprocesses will use these
-     * arguments (in addition to the classpath argument). The list may be
-     * <code>null</code> &ndash; this means to use the VM arguments of the
-     * current Java process as the VM arguments of the child process.
+     * arguments (in addition to the classpath argument). If this method is
+     * never called, the VM arguments of the current Java process are used as
+     * the VM arguments of the child process.
      *
      * @param vmArguments
-     *            The new VM arguments
+     *            The new VM arguments (not null)
      * @return This builder
      */
-    public JavaProcessBuilder vmArgs(final List<String> vmArguments) {
-        if(vmArguments == null) {
-            vmArgs = ManagementFactory.getRuntimeMXBean().getInputArguments();
-        }
-        else
-            vmArgs = vmArguments;
+    public JavaProcessBuilder vmArgs(final String... vmArguments) {
+        if(vmArguments == null)
+            throw new NullPointerException();
+        vmArgs.clear();
+        vmArgs.addAll(asList(vmArguments));
+        return this;
+    }
+    
+    /**
+     * Adds the given string to this builder's VM arguments.
+     *
+     * @param vmArguments
+     *            The additional VM arguments, not null
+     * @return This builder
+     */
+    public JavaProcessBuilder addVmArgs(final String... vmArguments) {
+        if(vmArguments == null)
+            throw new NullPointerException();
+        vmArgs.addAll(asList(vmArguments));
         return this;
     }
     
@@ -248,11 +299,9 @@ public class JavaProcessBuilder {
      * the working directory, the environment, etc.
      * 
      * @return A process builder
-     * @see #javaCommand(String, String, List, String, List, boolean)
      */
     public ProcessBuilder create() {
-        return new ProcessBuilder(javaCommand(javaHome, classpath, vmArgs,
-                mainClass, args, autoExit));
+        return new ProcessBuilder(javaCommand());
     }
     
     /**
@@ -268,36 +317,13 @@ public class JavaProcessBuilder {
     }
     
     /**
-     * Constructs a {@link ProcessBuilder} command list to start a Java program,
-     * corresponding to the provided details.
-     * <p>
-     * It is recommended to use instances of this class instead of this method.
+     * Constructs the {@link ProcessBuilder} command list to start a Java
+     * program, corresponding to the current configuration of this builder.
      * 
-     * @param javaHome
-     *            The base directory of the Java installation
-     * @param classpath
-     *            The classpath for the Java program
-     * @param vmArgs
-     *            The VM arguments (in addition to the classpath)
-     * @param mainClass
-     *            The name of the main class
-     * @param args
-     *            The arguments for the main class
-     * @param autoExit
-     *            Whether the program should be started via
-     *            {@link AutoExitProgram}
-     * @return The corresponding command list
-     * @throws NullPointerException
-     *             If any of the arguments is <code>null</code>
+     * @return The command list
      */
-    public static List<String> javaCommand(final String javaHome,
-            final String classpath, final List<String> vmArgs,
-            final String mainClass, final List<String> args,
-            final boolean autoExit) {
-        if(javaHome == null || classpath == null || mainClass == null)
-            throw new NullPointerException();
-        
-        final ArrayList<String> command = new ArrayList<String>();
+    public List<String> javaCommand() {
+        final List<String> command = new ArrayList<String>();
         command.addAll(asList(javaHome + javaExe, "-cp", classpath));
         command.addAll(vmArgs);
         if(autoExit)
