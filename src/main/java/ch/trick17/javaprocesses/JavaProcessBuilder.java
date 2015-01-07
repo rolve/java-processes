@@ -9,6 +9,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -32,13 +33,27 @@ public class JavaProcessBuilder {
     private static final String javaExe = File.separator + "bin"
             + File.separator + "java";
     
+    private static List<String> thisVmArgs() {
+        final ArrayList<String> args = new ArrayList<String>(ManagementFactory
+                .getRuntimeMXBean().getInputArguments());
+        /* Remove debug args because two VMs with the same debug args may cause
+         * trouble. (At least, this enables to debug the parent VM.) */
+        final Iterator<String> i = args.iterator();
+        while(i.hasNext()) {
+            final String arg = i.next();
+            if(arg.equals("-Xdebug") || arg.startsWith("-Xrunjdwp:")
+                    || arg.startsWith("-agentlib:jdwp"))
+                i.remove();
+        }
+        return args;
+    }
+    
     private final String mainClass;
     private final List<String> args;
     
     private String javaHome = System.getProperty("java.home");
     private String classpath = System.getProperty("java.class.path");
-    private final List<String> vmArgs = new ArrayList<String>(ManagementFactory
-            .getRuntimeMXBean().getInputArguments());
+    private final List<String> vmArgs = thisVmArgs();
     private boolean autoExit = false;
     
     /**
