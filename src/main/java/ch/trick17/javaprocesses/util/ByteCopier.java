@@ -23,7 +23,9 @@ public class ByteCopier implements Runnable, Callable<Void> {
     }
     
     /**
-     * Does the copying.
+     * Does the copying. This method wraps {@link IOException}s in
+     * {@link RuntimeException}s and should be used only if {@link IOException}s
+     * cannot be handled more robustly.
      * 
      * @throws RuntimeException
      *             If an {@link IOException} occurs
