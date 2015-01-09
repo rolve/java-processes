@@ -231,7 +231,7 @@ public class JavaProcessBuilder {
         if(classpath.isEmpty())
             classpath = cp;
         else
-            classpath += File.separator + cp;
+            classpath += File.pathSeparator + cp;
         return this;
     }
     
