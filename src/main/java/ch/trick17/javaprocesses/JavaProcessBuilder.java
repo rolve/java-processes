@@ -14,14 +14,18 @@ import java.util.List;
 
 /**
  * A class to build {@link ProcessBuilder}s for Java processes. So, yes,
- * instances of this class are builder builders.
+ * instances of this class are <em>builder</em> builders.
  * <p>
  * This class provides a simple way to start other Java programs. By default,
  * the Java executable, the classpath, the working directory and the environment
  * are the same as for the current Java process, but can be changed if desired.
  * <p>
  * Note that this class assumes that the Java executable is located at
- * <code><em>[java_home]</em>/bin/java</code>.
+ * <code><em>[java_home]</em>/bin/java</code>. Further, this class has a
+ * built-in workaround for the erroneous handling of empty command line
+ * arguments on Windows. See <a
+ * href="http://bugs.java.com/view_bug.do?bug_id=6518827"
+ * >http://bugs.java.com/view_bug.do?bug_id=6518827</a>.
  * <p>
  * The design of this class' interface mostly follows the {@link ProcessBuilder}
  * class.
@@ -306,7 +310,7 @@ public class JavaProcessBuilder {
      * subprocesses. See {@link System#getenv(String)}" */
     
     /**
-     * Creates a {@link ProcessBuilder} with a command that reflects the current
+     * Builds a {@link ProcessBuilder} with a command that reflects the current
      * settings of this builder. Changes subsequently made to this instance are
      * not reflected in the returned process builder.
      * <p>
@@ -315,12 +319,12 @@ public class JavaProcessBuilder {
      * 
      * @return A process builder
      */
-    public ProcessBuilder create() {
+    public ProcessBuilder build() {
         return new ProcessBuilder(javaCommand());
     }
     
     /**
-     * Convenience method that {@linkplain #create() creates} a process builder
+     * Convenience method that {@linkplain #build() builds} a process builder
      * and {@linkplain ProcessBuilder#start() starts} a process.
      * 
      * @return The started process
@@ -328,7 +332,7 @@ public class JavaProcessBuilder {
      *             If one is thrown by the {@link ProcessBuilder#start()} method
      */
     public Process start() throws IOException {
-        return create().start();
+        return build().start();
     }
     
     /**
@@ -344,7 +348,23 @@ public class JavaProcessBuilder {
         if(autoExit)
             command.add(AutoExitProgram.class.getName());
         command.add(mainClass);
-        command.addAll(args);
+        
+        if(isWindows())
+            /* Workaround for a bug in ProcessBuilder:
+             * http://bugs.java.com/view_bug.do?bug_id=6518827 */
+            for(final String arg : args)
+                if(arg.isEmpty())
+                    command.add("\"\"");
+                else
+                    command.add(arg);
+        else
+            command.addAll(args);
+        
         return command;
+    }
+    
+    private static boolean isWindows() {
+        return System.getProperty("os.name").toLowerCase()
+                .startsWith("windows");
     }
 }
