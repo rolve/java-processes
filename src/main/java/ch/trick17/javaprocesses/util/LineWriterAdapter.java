@@ -32,5 +32,6 @@ public class LineWriterAdapter implements LineWriter {
     public void writeLine(String line) throws IOException {
         writer.write(line);
         writer.write(lineSeparator);
+        writer.flush();
     }
 }
