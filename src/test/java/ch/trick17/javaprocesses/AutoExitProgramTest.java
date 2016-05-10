@@ -40,7 +40,7 @@ public class AutoExitProgramTest {
                         .getName()).start();
             else
                 new JavaProcessBuilder(FileDeleter.class).start();
-            
+                
             /* When this program exits (i.e. now), so should the AutoExitProgram */
         }
     }

@@ -37,7 +37,7 @@ public class AutoProcessKillerTest {
         public static void main(final String[] args) throws IOException {
             final Process process = new JavaProcessBuilder(FileDeleter.class)
                     .start();
-            
+                    
             if(args[0].equals("kill"))
                 new AutoProcessKiller().add(process);
         }

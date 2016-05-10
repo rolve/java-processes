@@ -6,9 +6,9 @@ import java.util.concurrent.Callable;
 import org.slf4j.Logger;
 
 /**
- * A simple {@link Runnable}/{@link Callable} that forwards all text from a
- * {@link BufferedReader} to a {@link Logger}, line by line. The default logging
- * level is {@linkplain Logger#info(String) INFO}.
+ * A simple {@link Runnable}/{@link Callable} that forwards all text from a {@link BufferedReader}
+ * to a {@link Logger}, line by line. The default logging level is {@linkplain Logger#info(String)
+ * INFO}.
  * 
  * @author Michael Faes
  */
@@ -19,11 +19,11 @@ public class LineLogger implements LineWriter {
     private String prefix = "";
     private LogLevel logLevel = LogLevel.INFO;
     
-    public LineLogger(Logger logger) {
+    public LineLogger(final Logger logger) {
         this.logger = logger;
     }
     
-    public LineLogger withPrefix(String thePrefix) {
+    public LineLogger withPrefix(final String thePrefix) {
         if(thePrefix == null)
             throw new IllegalArgumentException("null");
         this.prefix = thePrefix;
@@ -34,7 +34,7 @@ public class LineLogger implements LineWriter {
         return prefix;
     }
     
-    public LineLogger withLogLevel(LogLevel level) {
+    public LineLogger withLogLevel(final LogLevel level) {
         this.logLevel = level;
         return this;
     }
@@ -43,7 +43,7 @@ public class LineLogger implements LineWriter {
         return logLevel;
     }
     
-    public void writeLine(String line) {
+    public void writeLine(final String line) {
         switch(logLevel) {
         case TRACE:
             logger.trace(prefix + line);

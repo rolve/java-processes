@@ -1,34 +1,33 @@
 package ch.trick17.javaprocesses;
 
+import static java.lang.reflect.Modifier.isPublic;
+import static java.lang.reflect.Modifier.isStatic;
 import static java.util.Arrays.asList;
 
 import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
 /**
- * A class to build {@link ProcessBuilder}s for Java processes. So, yes,
- * instances of this class are <em>builder</em> builders.
+ * A class to build {@link ProcessBuilder}s for Java processes. So, yes, instances of this class are
+ * <em>builder</em> builders.
  * <p>
- * This class provides a simple way to start other Java programs. By default,
- * the Java executable, the classpath, the working directory and the environment
- * are the same as for the current Java process, but can be changed if desired.
+ * This class provides a simple way to start other Java programs. By default, the Java executable,
+ * the classpath, the working directory and the environment are the same as for the current Java
+ * process, but can be changed if desired.
  * <p>
- * Note that this class assumes that the Java executable is located at
- * <code><em>[java_home]</em>/bin/java</code>. Further, this class has a
- * built-in workaround for the erroneous handling of empty command line
- * arguments on Windows. See <a
- * href="http://bugs.java.com/view_bug.do?bug_id=6518827"
- * >http://bugs.java.com/view_bug.do?bug_id=6518827</a>.
+ * Note that this class assumes that the Java executable is located at <code><em>[java_home]</em>
+ * /bin/java</code>. Further, this class has a built-in workaround for the erroneous handling of
+ * empty command line arguments on Windows. See
+ * <a href="http://bugs.java.com/view_bug.do?bug_id=6518827" >http://bugs.java.com/view_bug.do?
+ * bug_id=6518827</a>.
  * <p>
- * The design of this class' interface mostly follows the {@link ProcessBuilder}
- * class.
+ * The design of this class' interface mostly follows the {@link ProcessBuilder} class.
  * 
  * @author Michael Faes
  */
@@ -36,12 +35,12 @@ public class JavaProcessBuilder {
     
     private static final String javaExe = File.separator + "bin"
             + File.separator + "java";
-    
+            
     private static List<String> thisVmArgs() {
         final ArrayList<String> args = new ArrayList<String>(ManagementFactory
                 .getRuntimeMXBean().getInputArguments());
-        /* Remove debug args because two VMs with the same debug args may cause
-         * trouble. (At least, this enables to debug the parent VM.) */
+        /* Remove debug args because two VMs with the same debug args may cause trouble. (At least,
+         * this enables to debug the parent VM.) */
         final Iterator<String> i = args.iterator();
         while(i.hasNext()) {
             final String arg = i.next();
@@ -61,8 +60,8 @@ public class JavaProcessBuilder {
     private boolean autoExit = false;
     
     /**
-     * Creates a builder for Java process builders with the given main class and
-     * an empty argument list.
+     * Creates a builder for Java process builders with the given main class and an empty argument
+     * list.
      * 
      * @param mainClass
      *            The main class
@@ -72,10 +71,9 @@ public class JavaProcessBuilder {
     }
     
     /**
-     * Creates a builder for Java process builders with the given main class and
-     * arguments. This constructor does <i>not</i> make a copy of the
-     * <code>args</code> array. Subsequent updates to the array will be
-     * reflected in the state of this builder (but not in the state of actual
+     * Creates a builder for Java process builders with the given main class and arguments. This
+     * constructor does <i>not</i> make a copy of the <code>args</code> array. Subsequent updates to
+     * the array will be reflected in the state of this builder (but not in the state of actual
      * process builders).
      * 
      * @param mainClass
@@ -88,11 +86,10 @@ public class JavaProcessBuilder {
     }
     
     /**
-     * Creates a builder for Java process builders with the given main class and
-     * arguments. This constructor does <i>not</i> make a copy of the
-     * <code>args</code> list. Subsequent updates to the list will be reflected
-     * in the state of this builder (but not in the state of actual process
-     * builders).
+     * Creates a builder for Java process builders with the given main class and arguments. This
+     * constructor does <i>not</i> make a copy of the <code>args</code> list. Subsequent updates to
+     * the list will be reflected in the state of this builder (but not in the state of actual
+     * process builders).
      * 
      * @param mainClass
      *            The main class
@@ -119,26 +116,21 @@ public class JavaProcessBuilder {
             throws NoSuchMethodException {
         final Method main = mainClass.getMethod("main", String[].class);
         final int modifiers = main.getModifiers();
-        if(!Modifier.isPublic(modifiers) || !Modifier.isStatic(modifiers)
-                || main.getReturnType() != Void.TYPE)
+        if(!isPublic(modifiers) || !isStatic(modifiers) || main.getReturnType() != Void.TYPE)
             throw new NoSuchMethodException("Class " + main.getName()
-                    + " does not have a \"public static void main(String[])\""
-                    + " method");
+                    + " does not have a \"public static void main(String[])\" method");
         return main;
     }
     
     /**
-     * Creates a builder for Java process builders with the given main class and
-     * arguments. If the class is in the current classpath, the
-     * {@link #JavaProcessBuilder(Class)} constructor should be used instead, as
-     * it checks if the class is a valid main class. This constructor does
-     * <i>not</i> make a copy of the <code>args</code> array. Subsequent updates
-     * to the array will be reflected in the state of this builder (but not in
-     * the state of actual process builders).
+     * Creates a builder for Java process builders with the given main class and arguments. If the
+     * class is in the current classpath, the {@link #JavaProcessBuilder(Class)} constructor should
+     * be used instead, as it checks if the class is a valid main class. This constructor does
+     * <i>not</i> make a copy of the <code>args</code> array. Subsequent updates to the array will
+     * be reflected in the state of this builder (but not in the state of actual process builders).
      * 
      * @param mainClass
-     *            The {@linkplain Class#getCanonicalName() canonical name} of
-     *            the main class.
+     *            The {@linkplain Class#getCanonicalName() canonical name} of the main class.
      * @param args
      *            The arguments for the main class
      */
@@ -147,17 +139,14 @@ public class JavaProcessBuilder {
     }
     
     /**
-     * Creates a builder for Java process builders with the given main class and
-     * arguments. If the class is in the current classpath, the
-     * {@link #JavaProcessBuilder(Class)} constructor should be used instead, as
-     * it checks if the class is a valid main class. This constructor does
-     * <i>not</i> make a copy of the <code>args</code> list. Subsequent updates
-     * to the list will be reflected in the state of this builder (but not in
-     * the state of actual process builders).
+     * Creates a builder for Java process builders with the given main class and arguments. If the
+     * class is in the current classpath, the {@link #JavaProcessBuilder(Class)} constructor should
+     * be used instead, as it checks if the class is a valid main class. This constructor does
+     * <i>not</i> make a copy of the <code>args</code> list. Subsequent updates to the list will be
+     * reflected in the state of this builder (but not in the state of actual process builders).
      * 
      * @param mainClass
-     *            The {@linkplain Class#getCanonicalName() canonical name} of
-     *            the main class.
+     *            The {@linkplain Class#getCanonicalName() canonical name} of the main class.
      * @param args
      *            The arguments for the main class
      */
@@ -167,8 +156,8 @@ public class JavaProcessBuilder {
     }
     
     /**
-     * Returns this builder's Java home directory. Java subprocesses will use
-     * the Java executable in this directory.
+     * Returns this builder's Java home directory. Java subprocesses will use the Java executable in
+     * this directory.
      *
      * @return This builder's Java home directory
      */
@@ -177,11 +166,11 @@ public class JavaProcessBuilder {
     }
     
     /**
-     * Sets this builder's Java home directory. Java subprocesses will use the
-     * Java executable in this directory. If this method is never called, the
-     * Java home directory of the current Java process, defined by the system
-     * property <code>java.home</code>, is used as the Java home directory of
-     * the child process.</p>
+     * Sets this builder's Java home directory. Java subprocesses will use the Java executable in
+     * this directory. If this method is never called, the Java home directory of the current Java
+     * process, defined by the system property <code>java.home</code>, is used as the Java home
+     * directory of the child process.
+     * </p>
      *
      * @param home
      *            The new Java home directory, not null
@@ -195,8 +184,7 @@ public class JavaProcessBuilder {
     }
     
     /**
-     * Returns this builder's classpath. Java subprocesses will use this as
-     * their classpath.
+     * Returns this builder's classpath. Java subprocesses will use this as their classpath.
      *
      * @return This builder's classpath
      */
@@ -205,10 +193,10 @@ public class JavaProcessBuilder {
     }
     
     /**
-     * Sets this builder's classpath. Java subprocesses will use this as their
-     * classpath. If this method is never called, the classpath of the current
-     * Java process, defined by the property <code>java.class.path</code>, is
-     * used as the classpath of the child process.</p>
+     * Sets this builder's classpath. Java subprocesses will use this as their classpath. If this
+     * method is never called, the classpath of the current Java process, defined by the property
+     * <code>java.class.path</code>, is used as the classpath of the child process.
+     * </p>
      *
      * @param cp
      *            The new classpath, not null
@@ -231,7 +219,7 @@ public class JavaProcessBuilder {
     public JavaProcessBuilder addClasspath(final String cp) {
         if(cp == null)
             throw new NullPointerException();
-        
+            
         if(classpath.isEmpty())
             classpath = cp;
         else
@@ -240,8 +228,8 @@ public class JavaProcessBuilder {
     }
     
     /**
-     * Returns this builder's VM arguments. Java subprocesses will use these
-     * arguments (in addition to the classpath argument).
+     * Returns this builder's VM arguments. Java subprocesses will use these arguments (in addition
+     * to the classpath argument).
      *
      * @return This builder's VM arguments
      */
@@ -250,10 +238,9 @@ public class JavaProcessBuilder {
     }
     
     /**
-     * Sets this builder's VM arguments. Java subprocesses will use these
-     * arguments (in addition to the classpath argument). If this method is
-     * never called, the VM arguments of the current Java process are used as
-     * the VM arguments of the child process.
+     * Sets this builder's VM arguments. Java subprocesses will use these arguments (in addition to
+     * the classpath argument). If this method is never called, the VM arguments of the current Java
+     * process are used as the VM arguments of the child process.
      *
      * @param vmArguments
      *            The new VM arguments (not null)
@@ -282,8 +269,8 @@ public class JavaProcessBuilder {
     }
     
     /**
-     * Returns this builder's auto exit flag. If <code>true</code>, Java
-     * subprocesses will be started via {@link AutoExitProgram}.
+     * Returns this builder's auto exit flag. If <code>true</code>, Java subprocesses will be
+     * started via {@link AutoExitProgram}.
      *
      * @return This builder's auto exit flag
      * @see AutoExit
@@ -293,8 +280,8 @@ public class JavaProcessBuilder {
     }
     
     /**
-     * Sets this builder's auto exit flag. If <code>true</code>, Java
-     * subprocesses will be started via {@link AutoExitProgram}.
+     * Sets this builder's auto exit flag. If <code>true</code>, Java subprocesses will be started
+     * via {@link AutoExitProgram}.
      *
      * @param exit
      *            The new value for the auto exit flag
@@ -305,17 +292,17 @@ public class JavaProcessBuilder {
         return this;
     }
     
-    /* TODO: Support for system properties. From Javadoc: "Note that system
-     * properties are generally preferred over environment variables for Java
-     * subprocesses. See {@link System#getenv(String)}" */
+    /* TODO: Support for system properties. From Javadoc: "Note that system properties are generally
+     * preferred over environment variables for Java subprocesses. See {@link
+     * System#getenv(String)}" */
     
     /**
-     * Builds a {@link ProcessBuilder} with a command that reflects the current
-     * settings of this builder. Changes subsequently made to this instance are
-     * not reflected in the returned process builder.
+     * Builds a {@link ProcessBuilder} with a command that reflects the current settings of this
+     * builder. Changes subsequently made to this instance are not reflected in the returned process
+     * builder.
      * <p>
-     * The returned process builder can be further modified, e.g., by setting
-     * the working directory, the environment, etc.
+     * The returned process builder can be further modified, e.g., by setting the working directory,
+     * the environment, etc.
      * 
      * @return A process builder
      */
@@ -324,8 +311,8 @@ public class JavaProcessBuilder {
     }
     
     /**
-     * Convenience method that {@linkplain #build() builds} a process builder
-     * and {@linkplain ProcessBuilder#start() starts} a process.
+     * Convenience method that {@linkplain #build() builds} a process builder and
+     * {@linkplain ProcessBuilder#start() starts} a process.
      * 
      * @return The started process
      * @throws IOException
@@ -336,8 +323,8 @@ public class JavaProcessBuilder {
     }
     
     /**
-     * Constructs the {@link ProcessBuilder} command list to start a Java
-     * program, corresponding to the current configuration of this builder.
+     * Constructs the {@link ProcessBuilder} command list to start a Java program, corresponding to
+     * the current configuration of this builder.
      * 
      * @return The command list
      */
@@ -359,12 +346,11 @@ public class JavaProcessBuilder {
                     command.add(arg);
         else
             command.addAll(args);
-        
+            
         return command;
     }
     
     private static boolean isWindows() {
-        return System.getProperty("os.name").toLowerCase()
-                .startsWith("windows");
+        return System.getProperty("os.name").toLowerCase().startsWith("windows");
     }
 }

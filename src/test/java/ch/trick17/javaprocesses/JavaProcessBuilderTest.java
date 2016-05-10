@@ -19,21 +19,21 @@ public class JavaProcessBuilderTest {
     
     private static final String lineSeparator = System
             .getProperty("line.separator");
-    
+            
     @Test
     public void testStart() throws IOException, InterruptedException {
         final Process process = new JavaProcessBuilder(Greeter.class, "Michael")
                 .start();
-        
+                
         final StringWriter output = new StringWriter();
         final StringWriter errors = new StringWriter();
         new Thread(new LineCopier(new BufferedReader(new InputStreamReader(
                 process.getInputStream())), new LineWriterAdapter(output)))
-                .start();
+                        .start();
         new Thread(new LineCopier(new BufferedReader(new InputStreamReader(
                 process.getErrorStream())), new LineWriterAdapter(errors)))
-                .start();
-        
+                        .start();
+                        
         process.waitFor();
         assertEquals("", errors.toString());
         assertEquals("Hello Michael!" + lineSeparator, output.toString());
@@ -75,7 +75,7 @@ public class JavaProcessBuilderTest {
                         .start();
             else
                 new JavaProcessBuilder(FileDeleter.class).start();
-            
+                
             /* When this program exits (i.e. now), so should the AutoExitProgram */
         }
     }

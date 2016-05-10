@@ -1,6 +1,8 @@
 package ch.trick17.javaprocesses;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,8 +38,8 @@ public class AutoExitTest {
         public static void main(final String[] args) throws IOException {
             new JavaProcessBuilder(FileDeleter.class, args).start();
             
-            /* When this program exits (i.e. now), so should the FileDeleter
-             * program (if autoexit is set). */
+            /* When this program exits (i.e. now), so should the FileDeleter program (if autoexit is
+             * set). */
         }
     }
     
@@ -46,7 +48,7 @@ public class AutoExitTest {
                 throws InterruptedException {
             if(args[0].equals("autoexit"))
                 AutoExit.install();
-            
+                
             Thread.sleep(2000);
             testFile.delete();
         }

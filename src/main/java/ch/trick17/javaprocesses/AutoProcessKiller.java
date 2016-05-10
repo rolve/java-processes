@@ -4,13 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This class provides a simple way to kill child processes when the JVM shuts
- * down.
+ * This class provides a simple way to kill child processes when the JVM shuts down.
  * <p>
- * This class relies on the {@linkplain Runtime#addShutdownHook(Thread) shutdown
- * hooks}, which are not guaranteed to run in all cases. An alternative is
- * {@link AutoExit}, which runs in the child process and kills it when the
- * "connection" to the parent process is lost.
+ * This class relies on the {@linkplain Runtime#addShutdownHook(Thread) shutdown hooks}, which are
+ * not guaranteed to run in all cases. An alternative is {@link AutoExit}, which runs in the child
+ * process and kills it when the "connection" to the parent process is lost.
  * 
  * @author Michael Faes
  */
@@ -46,8 +44,7 @@ public class AutoProcessKiller extends Thread {
     }
     
     /**
-     * Kills all processes that are in the {@linkplain #getProcesses() process
-     * list}.
+     * Kills all processes that are in the {@linkplain #getProcesses() process list}.
      */
     @Override
     public void run() {

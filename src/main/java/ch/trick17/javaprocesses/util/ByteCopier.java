@@ -6,9 +6,8 @@ import java.io.OutputStream;
 import java.util.concurrent.Callable;
 
 /**
- * A simple {@link Runnable}/{@link Callable} that copies all data from an
- * {@link InputStream} to an {@link OutputStream}. This is done byte by byte, so
- * it is a good idea to use buffered streams.
+ * A simple {@link Runnable}/{@link Callable} that copies all data from an {@link InputStream} to an
+ * {@link OutputStream}. This is done byte by byte, so it is a good idea to use buffered streams.
  * 
  * @author Michael Faes
  */
@@ -23,9 +22,8 @@ public class ByteCopier implements Runnable, Callable<Void> {
     }
     
     /**
-     * Does the copying. This method wraps {@link IOException}s in
-     * {@link RuntimeException}s and should be used only if {@link IOException}s
-     * cannot be handled more robustly.
+     * Does the copying. This method wraps {@link IOException}s in {@link RuntimeException}s and
+     * should be used only if {@link IOException}s cannot be handled more robustly.
      * 
      * @throws RuntimeException
      *             If an {@link IOException} occurs
