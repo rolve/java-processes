@@ -112,8 +112,7 @@ public class JavaProcessBuilder {
         return name;
     }
     
-    public static Method mainMethodOf(final Class<?> mainClass)
-            throws NoSuchMethodException {
+    public static Method mainMethodOf(final Class<?> mainClass) throws NoSuchMethodException {
         final Method main = mainClass.getMethod("main", String[].class);
         final int modifiers = main.getModifiers();
         if(!isPublic(modifiers) || !isStatic(modifiers) || main.getReturnType() != Void.TYPE)
@@ -281,7 +280,9 @@ public class JavaProcessBuilder {
     
     /**
      * Sets this builder's auto exit flag. If <code>true</code>, Java subprocesses will be started
-     * via {@link AutoExitProgram}.
+     * via {@link AutoExitProgram}. Of course, this only works if <code>AutoExitProgram</code> is on
+     * the classpath. Note that if {@link #classpath(String)} is never called, this will be the
+     * case.
      *
      * @param exit
      *            The new value for the auto exit flag
