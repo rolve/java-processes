@@ -41,7 +41,7 @@ directory, or I/O behavior. `JavaProcessBuilder` is actually built on top of
 Process proc = new JavaProcessBuilder(SomeClass.class)
         .classpath("some-classes.jar")
         .build()
-        .directory(new File("test")
+        .directory(new File("test"))
         .inheritIO()
         .start();
 ```
@@ -50,3 +50,32 @@ What is happening here is that `.build()` returns a `ProcessBuilder` instance th
 has all the JVM-specific configuration imprinted and can then be further configured.
 In fact, the `JavaProcessBuilder.start()` method is simply a shorthand for
 `build().start()`.
+
+## Auto-Exit
+
+One thing that is annoying when executing parts of your program in separate JVMs is
+that they continue to run when you kill the parent process. This is especially true
+during debugging. This library comes with *two* mechanism that can help you with that.
+
+The first mechanism is based on
+[shutdown hooks](https://docs.oracle.com/javase/9/docs/api/java/lang/Runtime.html#addShutdownHook-java.lang.Thread-)
+and can be used in the following way:
+
+```java
+new AutoProcessKiller().add(process);
+```
+
+Now, when the JVM shuts down, the `AutoProcessKiller` (which is a Thread) is executed
+and kills the process (if it is still running).
+
+However, this will not work if the JVM is terminated forcibly, which happens, for
+example, if you press the stop button in Eclipse. In this case, the shutdown hooks
+may not be executed, so the child processes may continue to run. In fact, I think
+*any* mechanism to kill child processes from within the parent JVM is doomed to
+suffer from this problem.
+
+This is why this library comes with a second mechanism, which works from within the
+*child* VM and is guaranteed to kill the child process as soon as the parent process
+stops running (for whatever reason).
+
+*TO DO*
