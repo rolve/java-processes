@@ -14,9 +14,10 @@ To start part of your Java program in a separate JVM, simply write:
 Process proc = new JavaProcessBuilder(SomeClass.class, "some", "args").start();
 ```
 
-That's it! This snippet will start a new JVM with `SomeClass` as the main class. No
-need to specify the classpath, the VM args, or the path to the Java executable; these
-are all taken from the JVM in which your program is running!
+That's it! This snippet will start a new JVM with `SomeClass` as the main class, passing
+`"some"` and `"args"` as arguments. No need to specify the classpath, the VM args, or
+the path to the Java executable; these are all taken from the JVM in which your program
+is running!
 
 ## Configuration
 
@@ -25,7 +26,7 @@ the Java executable, if you want them to be different from those of the parent J
 
 ```java
 Process proc = new JavaProcessBuilder(SomeClass.class)
-        .javaHome("/my/own/java/")
+        .javaHome("/different/java/")
         .classpath("some-classes.jar")
         .vmArgs("-ea", "-Xmx8g")
         .start();
@@ -46,16 +47,18 @@ Process proc = new JavaProcessBuilder(SomeClass.class)
         .start();
 ```
 
-What is happening here is that `.build()` returns a `ProcessBuilder` instance that
+What is happening here is that `build()` returns a `ProcessBuilder` instance that
 has all the JVM-specific configuration imprinted and can then be further configured.
 In fact, the `JavaProcessBuilder.start()` method is simply a shorthand for
 `build().start()`.
 
-## Auto-Exit
+## Automatically Killing Child Processes
 
 One thing that is annoying when executing parts of your program in separate JVMs is
 that they continue to run when you kill the parent process (especially during
 debugging). This library comes with *two* mechanism that can help you with that.
+
+### AutoProcessKiller
 
 The first mechanism is based on
 [shutdown hooks](https://docs.oracle.com/javase/9/docs/api/java/lang/Runtime.html#addShutdownHook-java.lang.Thread-)
@@ -72,6 +75,8 @@ example, if you press the stop button in Eclipse. In this case, the shutdown hoo
 may not be executed, so the child processes may continue to run. In fact, I think
 *any* mechanism to kill child processes from within the parent JVM is doomed to
 suffer from this problem.
+
+### AutoExit
 
 This is why this library comes with a second mechanism, which works from within the
 *child* VM and is guaranteed to kill the child process as soon as the parent process
@@ -90,3 +95,9 @@ Process proc = new JavaProcessBuilder(SomeClass.class).autoExit(true).start();
 
 In this case, the process builder will use the `AutoExitProgram` class as the actual
 main class, which in turn calls `AutoExit.install()` and then calls `SomeClass.main()`.
+
+This mechanism is based on a simple trick: `AutoExit` (being a separate thread) calls
+`System.in.read()`, which only returns once the parent process terminates. As soon as
+this happens, `System.exit()` is called. Note, however, that this trick does not work
+if you need to use `System.in` for something else in the child process. In that case,
+you should use the first mechanism.
