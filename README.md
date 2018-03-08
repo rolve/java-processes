@@ -11,7 +11,7 @@ within Java. This is useful in a number of situations:
 To start part of your Java program in a separate JVM, simply write:
 
 ```java
-Process proc = new JavaProcessBuilder(SomeClass.class).start();
+Process proc = new JavaProcessBuilder(SomeClass.class, "some", "args").start();
 ```
 
 That's it! This snippet will start a new JVM with `SomeClass` as the main class. No
@@ -54,8 +54,8 @@ In fact, the `JavaProcessBuilder.start()` method is simply a shorthand for
 ## Auto-Exit
 
 One thing that is annoying when executing parts of your program in separate JVMs is
-that they continue to run when you kill the parent process. This is especially true
-during debugging. This library comes with *two* mechanism that can help you with that.
+that they continue to run when you kill the parent process (especially during
+debugging). This library comes with *two* mechanism that can help you with that.
 
 The first mechanism is based on
 [shutdown hooks](https://docs.oracle.com/javase/9/docs/api/java/lang/Runtime.html#addShutdownHook-java.lang.Thread-)
@@ -67,7 +67,6 @@ new AutoProcessKiller().add(process);
 
 Now, when the JVM shuts down, the `AutoProcessKiller` (which is a Thread) is executed
 and kills the process (if it is still running).
-
 However, this will not work if the JVM is terminated forcibly, which happens, for
 example, if you press the stop button in Eclipse. In this case, the shutdown hooks
 may not be executed, so the child processes may continue to run. In fact, I think
@@ -76,6 +75,18 @@ suffer from this problem.
 
 This is why this library comes with a second mechanism, which works from within the
 *child* VM and is guaranteed to kill the child process as soon as the parent process
-stops running (for whatever reason).
+stops running (for whatever reason). You can use it by calling
 
-*TO DO*
+```java
+AutoExit.install();
+```
+
+in the child VM. Or, to make it even simpler, you can call `autoExit(true)` on the
+process builder instance that you use to start the child VM:
+
+```java
+Process proc = new JavaProcessBuilder(SomeClass.class).autoExit(true).start();
+```
+
+In this case, the process builder will use the `AutoExitProgram` class as the actual
+main class, which in turn calls `AutoExit.install()` and then calls `SomeClass.main()`.
